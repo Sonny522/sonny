@@ -1,0 +1,11 @@
+{
+  "name": "personal-globe",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler pages dev public --port 8788",
+    "deploy": "wrangler pages deploy public --project-name personal-globe"
+  },
+  "devDependencies": {
+    "wrangler": "4.151.1"
+  }
+}
