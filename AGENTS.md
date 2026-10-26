@@ -1,6 +1,7 @@
-# Personal globe page (Cloudflare Pages)
+# Personal globe page (Cloudflare Workers static assets)
 
-- Static site, no build step. Output dir: `public/` (see `wrangler.toml`).
+- Static site, no build step. Served as Worker `sonny` with `[assets] directory = "./public"` (see `wrangler.toml`).
+- Cloudflare Workers Builds is connected to the GitHub repo: pushing to `main` runs `npx wrangler deploy`.
 - Globe: globe.gl via CDN (pinned version in `public/index.html`), logic in `public/main.js`.
 - Avatar: `public/assets/avatar.jpg` (full-length photo; head crop via `.avatar img` width/left/top in `style.css` — adjust if photo changes).
 - Local preview: `python -m http.server 8788 --directory public` (wrangler 4 needs Node >= 22; `npm run dev` otherwise).
