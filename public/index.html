@@ -245,7 +245,25 @@
     <p class="intro-hint">点击屏幕继续</p>
   </section>
 
+  <canvas id="meteors" aria-hidden="true"></canvas>
   <div id="globe"></div>
+
+  <button id="music" class="music" type="button" title="播放背景音乐" aria-label="背景音乐开关"><span>♪</span></button>
+
+  <section id="china" class="china" hidden aria-label="关于我">
+    <div class="china-card">
+      <button id="chinaBack" class="china-back" type="button">← 返回地球</button>
+      <p class="china-kicker">📍 中国 · 成都</p>
+      <h2>你好，我是松尼</h2>
+      <p class="china-lead">GIS 研发工程师 · WebGIS / UE5 GIS 开发</p>
+      <div class="china-grid">
+        <article><h3>关于我</h3><p>GIS 研发工程师，擅长各类 WebGIS 及基于 UE5 的 GIS 开发。</p></article>
+        <article><h3>工作经历</h3><p>2022 — 至今　四川测绘局某事业单位</p></article>
+        <article><h3>项目作品</h3><p>各类地方 GIS 大屏<br/>地震磐御大模型</p></article>
+        <article><h3>联系方式</h3><p>微信：<button id="wechat" class="copy-id" type="button" data-id="Leeshaolong_" title="点击复制微信号">Leeshaolong_</button></p></article>
+      </div>
+    </div>
+  </section>
 
   <main id="card" class="card">
     <button id="toggle" class="toggle" title="收起 / 展开面板" aria-label="收起或展开面板">⟨</button>
@@ -284,11 +302,13 @@
     <span class="sep">|</span>
     <span>WGS 84 · EPSG:4326</span>
     <span class="sep">|</span>
-    <span class="hint">拖动旋转 · 滚轮缩放 · 点击标注</span>
+    <span class="hint">拖动旋转 · 滚轮缩放 · 点击中国了解我</span>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/globe.gl@2.46.2/dist/globe.gl.min.js"></script>
   <script src="/main.js"></script>
+  <script src="/meteors.js"></script>
+  <script src="/bgm.js"></script>
   <script src="/intro.js"></script>
 </body>
 </html>

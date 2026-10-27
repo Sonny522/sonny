@@ -4,6 +4,9 @@
 - Cloudflare Workers Builds is connected to the GitHub repo: pushing to `main` runs `npx wrangler deploy`.
 - URLs: https://sonny.us.ci (custom domain, zone on Cloudflare; domain registered at DNSHE with NS -> Cloudflare) and https://sonny.522735184.workers.dev.
 - Globe: globe.gl via CDN (pinned version in `public/index.html`), logic in `public/main.js`.
+  Clicking China (CHN/TWN polygon) flies in + CSS `.warp` zoom on `#globe`, then shows `#china` intro panel (content in `index.html`).
+- Background: `public/meteors.js` (canvas shooting stars behind globe), `public/bgm.js` (Web Audio synthesized ambient music,
+  starts on first user gesture, toggle button `#music`, preference in localStorage `bgm`).
 - Avatar: `public/assets/avatar.jpg` (full-length photo; head crop via `.avatar img` width/left/top in `style.css` — adjust if photo changes).
 - Local preview: `python -m http.server 8788 --directory public` (wrangler 4 needs Node >= 22; `npm run dev` otherwise).
 - Deploy: `npm run deploy` (Node >= 22, `npx wrangler login` first).

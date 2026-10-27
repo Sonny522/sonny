@@ -18,13 +18,15 @@ const CHINA_COLOR = '#ff8fa3';
 const home = PLACES.find(p => p.home) || PLACES[0];
 const el = document.getElementById('globe');
 
+const CHINA = { lat: 35.5, lng: 104 };
+
 const hash = s => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+const isoCode = ({ properties: { ISO_A3, ADM0_A3 } }) => (ISO_A3 !== '-99' ? ISO_A3 : ADM0_A3);
+const isChina = f => ['CHN', 'TWN'].includes(isoCode(f));
 const countryColor = f => {
-  const { ISO_A3, ADM0_A3, ADMIN = '' } = f.properties;
-  const code = ISO_A3 !== '-99' ? ISO_A3 : ADM0_A3;
-  if (code === 'CHN' || code === 'TWN') return CHINA_COLOR;
-  if (code === 'ATA') return '#f8fbff';
-  return PALETTE[hash(ADMIN) % PALETTE.length];
+  if (isChina(f)) return CHINA_COLOR;
+  if (isoCode(f) === 'ATA') return '#f8fbff';
+  return PALETTE[hash(f.properties.ADMIN || '') % PALETTE.length];
 };
 
 let hovered = null;
@@ -39,11 +41,13 @@ const globe = new Globe(el)
   .polygonSideColor(() => 'rgba(29,53,87,0.35)')
   .polygonStrokeColor(() => OUTLINE)
   .polygonsTransitionDuration(250)
-  .polygonLabel(f => `<div class="tooltip" style="opacity:1;position:static"><b>${f.properties.ADMIN}</b></div>`)
+  .polygonLabel(f => `<div class="tooltip" style="opacity:1;position:static"><b>${f.properties.ADMIN}</b>${isChina(f) ? '<br/><small>点击了解我 ›</small>' : ''}</div>`)
   .onPolygonHover(f => {
     hovered = f;
     applyHover();
+    el.style.cursor = f && isChina(f) ? 'pointer' : '';
   })
+  .onPolygonClick(f => isChina(f) && zoomToChina())
   // 地点
   .pointsData(PLACES)
   .pointLat('lat')
@@ -127,21 +131,68 @@ el.addEventListener('mousemove', e => {
   coordsEl.textContent = c ? `${fmt(c.lat, 'N', 'S')}  ${fmt(c.lng, 'E', 'W')}` : 'LAT —  LNG —';
 });
 
-// 抖音：点击复制抖音号
-const douyinBtn = document.getElementById('douyin');
-douyinBtn.addEventListener('click', async () => {
-  const id = douyinBtn.dataset.id;
-  try {
-    await navigator.clipboard.writeText(id);
-    douyinBtn.textContent = `已复制 ${id}`;
-  } catch {
-    douyinBtn.textContent = `抖音号 ${id}`;
-  }
-  setTimeout(() => (douyinBtn.textContent = '♪ 抖音'), 2500);
-});
+// 抖音 / 微信：点击复制账号
+function copyOnClick(btn, failText) {
+  const label = btn.textContent;
+  btn.addEventListener('click', async () => {
+    const id = btn.dataset.id;
+    try {
+      await navigator.clipboard.writeText(id);
+      btn.textContent = `已复制 ${id}`;
+    } catch {
+      btn.textContent = `${failText} ${id}`;
+    }
+    setTimeout(() => (btn.textContent = label), 2500);
+  });
+}
+copyOnClick(document.getElementById('douyin'), '抖音号');
+copyOnClick(document.getElementById('wechat'), '微信号');
 
 // 收起 / 展开名片
 document.getElementById('toggle').addEventListener('click', () => {
   document.getElementById('card').classList.toggle('collapsed');
   layout();
 });
+
+// 点击中国：镜头飞入 → 无限拉近转场 → 个人介绍
+const story = document.getElementById('china');
+const wait = ms => new Promise(r => setTimeout(r, ms));
+let zooming = false;
+
+async function zoomToChina() {
+  if (zooming || !story.hidden) return;
+  zooming = true;
+  controls.autoRotate = false;
+  controls.enabled = false;
+  clearTimeout(resumeTimer);
+  document.body.classList.add('china-zoom');
+  globe.pointOfView({ ...CHINA, altitude: 1.2 }, 1500);
+  await wait(1500);
+  const { x, y } = globe.getScreenCoords(CHINA.lat, CHINA.lng);
+  el.style.transformOrigin = `${x}px ${y}px`;
+  globe.pointOfView({ ...CHINA, altitude: 0.2 }, 1600);
+  await wait(700);
+  el.classList.add('warp');
+  await wait(1300);
+  story.hidden = false;
+  requestAnimationFrame(() => requestAnimationFrame(() => story.classList.add('show')));
+  zooming = false;
+}
+
+async function leaveChina() {
+  if (zooming || story.hidden) return;
+  zooming = true;
+  story.classList.remove('show');
+  await wait(500);
+  story.hidden = true;
+  el.classList.remove('warp');
+  globe.pointOfView({ lat: 25, lng: home.lng, altitude: 2.2 }, 2000);
+  await wait(1200);
+  document.body.classList.remove('china-zoom');
+  controls.enabled = true;
+  resumeTimer = setTimeout(() => (controls.autoRotate = true), 3000);
+  zooming = false;
+}
+
+document.getElementById('chinaBack').addEventListener('click', leaveChina);
+document.addEventListener('keydown', e => e.key === 'Escape' && leaveChina());
